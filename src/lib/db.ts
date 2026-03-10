@@ -74,7 +74,7 @@ export async function getPlayerProfile(
     : { id: identifier.id };
 
   const player = await prisma.player.findFirst({
-    where: { ...where, isRegistered: true },
+    where: { ...where, isRegistered: 1 },
     include: {
       mapStats: { orderBy: { matches: 'desc' } },
       proLeagueStats: true,
@@ -130,10 +130,10 @@ export async function getPlayerProfile(
     premiumUntil: player.premiumUntil,
     playerTag: player.playerTag,
     customTitle: player.customTitle,
-    nickColor: player.nickColor,
-    patternId: player.patternId,
-    bannerUrl: player.bannerUrl,
-    bannerFileId: player.bannerFileId,
+    nickColor: null,
+    patternId: 0,
+    bannerUrl: null,
+    bannerFileId: null,
     seasonSkin: player.seasonSkin,
     createdAt: player.createdAt,
     kd: calcKD(player.kills, player.deaths),
@@ -155,7 +155,7 @@ export async function getPlayerProfile(
 export async function getLeaderboard(league: 'default' | 'pro', limit = 100): Promise<LeaderboardEntry[]> {
   if (league === 'default') {
     const players = await prisma.player.findMany({
-      where: { isRegistered: true },
+      where: { isRegistered: 1 },
       orderBy: { elo: 'desc' },
       take: limit,
       select: {
@@ -179,7 +179,7 @@ export async function getLeaderboard(league: 'default' | 'pro', limit = 100): Pr
     }));
   } else {
     const stats = await prisma.proLeagueStat.findMany({
-      where: { player: { isRegistered: true, hasProLeague: true } },
+      where: { player: { isRegistered: 1, hasProLeague: 1 } },
       orderBy: { elo: 'desc' },
       take: limit,
       include: {
@@ -211,7 +211,7 @@ export async function searchPlayers(query: string, limit = 10) {
   return prisma.player.findMany({
     where: {
       gameNickname: { contains: query, mode: 'insensitive' },
-      isRegistered: true,
+      isRegistered: 1,
     },
     orderBy: { elo: 'desc' },
     take: limit,
